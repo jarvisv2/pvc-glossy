@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Glossy Photo Card Maker Pro</title>
+<title>Card Maker Pro by Jarvisv2</title>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
@@ -174,6 +174,10 @@ button,input,select{font:inherit}
 .modal{position:fixed;inset:0;background:rgba(12,27,47,.52);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}.modal.open{display:flex}.modalcard{background:#fff;border-radius:20px;max-width:1250px;width:100%;max-height:94vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 85px rgba(12,30,55,.35)}.modalhead{padding:17px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.modalbody{padding:18px 20px;overflow:auto}.modalgrid{display:grid;grid-template-columns:1.05fr 1fr;gap:16px}.sourcebox{border:1px solid var(--line);border-radius:15px;background:#f5f8fc;padding:12px}.sourcewrap{position:relative;width:100%;line-height:0;background:#fff;border-radius:7px;overflow:hidden}
 .sourcecanvas{display:block;width:100%;height:auto;background:#fff;border-radius:7px}
 .crop-overlay{position:absolute;inset:0;pointer-events:none}
+.crop-overlay.manual-drawing{pointer-events:auto;cursor:crosshair;touch-action:none}
+.crop-overlay.manual-drawing .cropbox{pointer-events:none!important}
+.manual-draft{position:absolute;border:2px dashed #1769ff;background:rgba(23,105,255,.16);box-shadow:0 0 0 1px rgba(255,255,255,.95);pointer-events:none;z-index:8}
+.manual-draft.backbox{border-color:#0a9b6f;background:rgba(10,155,111,.16)}
 .cropbox{position:absolute;border:2px solid #1769ff;background:rgba(23,105,255,.08);box-shadow:0 0 0 1px rgba(255,255,255,.9);pointer-events:auto;cursor:move;touch-action:none}
 .cropbox.backbox{border-color:#0a9b6f;background:rgba(10,155,111,.08)}
 .cropbox.active{box-shadow:0 0 0 2px #fff,0 0 0 4px #1769ff;z-index:3}
@@ -182,6 +186,9 @@ button,input,select{font:inherit}
 .cropbox.backbox .tag{background:#0a9b6f}
 .handle{position:absolute;width:10px;height:10px;border:2px solid #fff;background:#1769ff;border-radius:2px;box-shadow:0 0 0 1px #1769ff;z-index:4}
 .cropbox.backbox .handle{background:#0a9b6f;box-shadow:0 0 0 1px #0a9b6f}
+.cropbox.manual-fixed{cursor:grab;touch-action:none}
+.cropbox.manual-fixed:active{cursor:grabbing}
+.cropbox.manual-fixed .handle{display:none!important}
 .handle.tl{left:-6px;top:-6px;cursor:nwse-resize}.handle.tr{right:-6px;top:-6px;cursor:nesw-resize}
 .handle.bl{left:-6px;bottom:-6px;cursor:nesw-resize}.handle.br{right:-6px;bottom:-6px;cursor:nwse-resize}
 .sourceactions{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
@@ -2422,7 +2429,7 @@ html[data-theme="mono"] .brand:hover .brand-title--handwritten h1.brand-wordmark
       <div class="modalgrid">
         <div>
           <div class="smalllabel">Source PDF • detected boundaries</div>
-          <div class="sourcebox"><div class="sourcewrap" id="sourceWrap"><canvas class="sourcecanvas" id="sourcePreview"></canvas><div class="crop-overlay" id="cropOverlay"></div></div><div class="sourceactions"><button class="btn softbtn" id="editFrontBtn">Edit Front</button><button class="btn softbtn" id="editBackBtn">Edit Back</button><span class="edithelp">Drag a box to move • drag a corner to resize</span></div><div class="legend"><span class="dot"></span> Blue = Front • Green = Back • Selected card ratio locked</div></div>
+          <div class="sourcebox"><div class="sourcewrap" id="sourceWrap"><canvas class="sourcecanvas" id="sourcePreview"></canvas><div class="crop-overlay" id="cropOverlay"></div></div><div class="sourceactions"><button class="btn softbtn" id="editFrontBtn">Edit Front</button><button class="btn softbtn" id="editBackBtn">Edit Back</button><button class="btn primary" id="manualFrontBtn" type="button">Place Front 86 × 54</button><button class="btn primary" id="manualBackBtn" type="button">Place Back 86 × 54</button><span class="edithelp" id="manualCropHint" aria-live="polite">Place a fixed-size box, then drag it into position. Manual boxes cannot be resized.</span><span class="edithelp">Manual boxes: drag to move only • automatic boxes: corners can resize</span></div><div class="legend"><span class="dot"></span> Blue = Front • Green = Back • Manual boxes are fixed at 86 × 54 mm</div></div>
         </div>
         <div>
           <div class="previewgrid"><div class="previewbox"><h3>FRONT</h3><canvas id="frontPreview"></canvas></div><div class="previewbox"><h3>BACK</h3><canvas id="backPreview"></canvas></div></div>
@@ -2486,7 +2493,7 @@ function drawSheet(){
   ctx.stroke();
 }
 defaultProfiles={};
-function renderSlots(){slotsEl.innerHTML='';for(let i=0;i<5;i++){const c=cards[i];const el=document.createElement('div');el.className='slot';const readyClass=c?.front?'good':'';const label=c?.front?'READY':'EMPTY';el.innerHTML=`<div class="slothead"><b>Card ${i+1}</b><span class="pill ${readyClass}">${label}</span></div><div class="field"><label>Document</label><select class="doc"><option value="auto">Auto detect</option><option value="ayushman">Ayushman Card</option><option value="eration">e-Ration Card</option></select></div><div class="status ${c?.front?'good':''}">${c?.status||'Waiting for PDF'}</div><details class="settings"><summary>Advanced crop correction</summary><div class="adjustgrid"><div class="range"><label>Horizontal</label><input data-k="x" type="range" min="-4" max="4" step=".1" value="0"></div><div class="range"><label>Vertical</label><input data-k="y" type="range" min="-4" max="4" step=".1" value="0"></div><div class="range"><label>Width</label><input data-k="w" type="range" min="-3" max="3" step=".1" value="0"></div><div class="range"><label>Height</label><input data-k="h" type="range" min="-3" max="3" step=".1" value="0"></div></div></details><div class="slottools"><button class="btn softbtn mini review">Review crop</button><button class="btn graybtn mini remove">Remove</button></div>`;el.querySelector('.doc').value=c?.job?.docOverride||'auto';el.querySelector('.doc').onchange=()=>{if(cards[i]?.job){cards[i].job.docOverride=el.querySelector('.doc').value;cards[i].job.det=detectDocument(cards[i].job.render.canvas,cards[i].job.docOverride,cards[i].job.render.text||'',cards[i].job.render.pages||[]);if(cards[i].job.det.twoPage&&cards[i].job.render.pages?.length>1){const p1=cards[i].job.render.pages[0].canvas,p2=cards[i].job.render.pages[1].canvas,gap=cards[i].job.det.gap||Math.max(20,Math.round(p1.height*.035));const comp=document.createElement('canvas');comp.width=Math.max(p1.width,p2.width);comp.height=p1.height+gap+p2.height;const cc=comp.getContext('2d');cc.fillStyle='#fff';cc.fillRect(0,0,comp.width,comp.height);cc.drawImage(p1,0,0);cc.drawImage(p2,0,p1.height+gap);cards[i].job.render.sourceCanvas=comp}else{cards[i].job.render.sourceCanvas=cards[i].job.render.canvas}cards[i].job.detBase=cloneDet(cards[i].job.det);cards[i].job.adjust={x:0,y:0,w:0,h:0};rebuildJobCrop(cards[i].job);cards[i].status=`${cards[i].job.det.type} detected • template updated`;drawSheet();renderSlots();showCropPreview(cards[i].job)}};el.querySelector('.review').onclick=()=>{if(cards[i]?.job)showCropPreview(cards[i].job)};el.querySelector('.remove').onclick=()=>{cards.splice(i,1);drawSheet();renderSlots()};el.querySelectorAll('[data-k]').forEach(inp=>inp.oninput=()=>{if(cards[i]?.job){cards[i].job.adjust[inp.dataset.k]=parseFloat(inp.value);rebuildJobCrop(cards[i].job);drawSheet();}});slotsEl.appendChild(el)}}
+function renderSlots(){slotsEl.innerHTML='';for(let i=0;i<5;i++){const c=cards[i];const el=document.createElement('div');el.className='slot';const readyClass=c?.front?'good':'';const label=c?.front?'READY':'EMPTY';el.innerHTML=`<div class="slothead"><b>Card ${i+1}</b><span class="pill ${readyClass}">${label}</span></div><div class="field"><label>Document</label><select class="doc"><option value="auto">Auto detect</option><option value="ayushman">Ayushman Card</option><option value="eration">e-Ration Card</option><option value="manual">Other document • Manual crop</option></select></div><div class="status ${c?.front?'good':''}">${c?.status||'Waiting for PDF'}</div><details class="settings"><summary>Advanced crop correction</summary><div class="adjustgrid"><div class="range"><label>Horizontal</label><input data-k="x" type="range" min="-4" max="4" step=".1" value="0"></div><div class="range"><label>Vertical</label><input data-k="y" type="range" min="-4" max="4" step=".1" value="0"></div><div class="range"><label>Width</label><input data-k="w" type="range" min="-3" max="3" step=".1" value="0"></div><div class="range"><label>Height</label><input data-k="h" type="range" min="-3" max="3" step=".1" value="0"></div></div></details><div class="slottools"><button class="btn softbtn mini review">Review crop</button><button class="btn graybtn mini remove">Remove</button></div>`;el.querySelector('.doc').value=c?.job?.docOverride||'auto';el.querySelector('.doc').onchange=()=>{if(cards[i]?.job){cards[i].job.docOverride=el.querySelector('.doc').value;cards[i].job.det=detectDocument(cards[i].job.render.canvas,cards[i].job.docOverride,cards[i].job.render.text||'',cards[i].job.render.pages||[]);if(cards[i].job.det.twoPage&&cards[i].job.render.pages?.length>1){const p1=cards[i].job.render.pages[0].canvas,p2=cards[i].job.render.pages[1].canvas,gap=cards[i].job.det.gap||Math.max(20,Math.round(p1.height*.035));const comp=document.createElement('canvas');comp.width=Math.max(p1.width,p2.width);comp.height=p1.height+gap+p2.height;const cc=comp.getContext('2d');cc.fillStyle='#fff';cc.fillRect(0,0,comp.width,comp.height);cc.drawImage(p1,0,0);cc.drawImage(p2,0,p1.height+gap);cards[i].job.render.sourceCanvas=comp}else{cards[i].job.render.sourceCanvas=cards[i].job.render.canvas}cards[i].job.detBase=cloneDet(cards[i].job.det);cards[i].job.adjust={x:0,y:0,w:0,h:0};rebuildJobCrop(cards[i].job);cards[i].status=`${cards[i].job.det.type} detected • template updated`;drawSheet();renderSlots();showCropPreview(cards[i].job)}};el.querySelector('.review').onclick=()=>{if(cards[i]?.job)showCropPreview(cards[i].job)};el.querySelector('.remove').onclick=()=>{cards.splice(i,1);drawSheet();renderSlots()};el.querySelectorAll('[data-k]').forEach(inp=>inp.oninput=()=>{if(cards[i]?.job){cards[i].job.adjust[inp.dataset.k]=parseFloat(inp.value);rebuildJobCrop(cards[i].job);drawSheet();}});slotsEl.appendChild(el)}}
 
 function pageBorderLines(c){const im=c.getContext('2d').getImageData(0,0,c.width,c.height).data,w=c.width,h=c.height;function colScore(x){let n=0;for(let y=0;y<h;y+=2){const i=(y*w+x)*4;if(im[i]<75&&im[i+1]<75&&im[i+2]<75)n++}return n}function rowScore(y){let n=0;for(let x=0;x<w;x+=2){const i=(y*w+x)*4;if(im[i]<75&&im[i+1]<75&&im[i+2]<75)n++}return n}let lx=0,rx=w-1;for(let x=0;x<Math.min(280,w);x++)if(colScore(x)>h*.35){lx=x;break}for(let x=w-1;x>Math.max(w-280,0);x--)if(colScore(x)>h*.35){rx=x;break}let center=w/2;let best=0,bscore=0;for(let x=Math.floor(w*.42);x<Math.ceil(w*.58);x++)if(colScore(x)>bscore){bscore=colScore(x);best=x}if(best===0)best=center;let top=0,bottom=h-1;for(let y=0;y<Math.min(400,h);y++)if(rowScore(y)>w*.35){top=y;break}for(let y=h-1;y>Math.max(h-400,0);y--)if(rowScore(y)>w*.35){bottom=y;break}return{lx,rx,center:best,top,bottom}}
 function rowSignals(c){const w=c.width,h=c.height,im=c.getContext('2d').getImageData(0,0,w,h).data;const dark=new Uint32Array(h),red=new Uint32Array(h);for(let y=0;y<h;y+=2){for(let x=0;x<w;x+=2){const i=(y*w+x)*4,r=im[i],g=im[i+1],b=im[i+2];if(r<95&&g<95&&b<95)dark[y]++;if(r>150&&r>g*1.25&&r>b*1.15)red[y]++}}return{dark,red}}
@@ -2561,6 +2568,7 @@ function detectEPan(c){
 function detectGeneric(c){const b=pageBorderLines(c);return{type:'Government ID',confidence:.55,front:{x:b.lx+8,y:Math.round(c.height*.66),w:b.center-b.lx-16,h:Math.round(c.height*.20)},back:{x:b.center+8,y:Math.round(c.height*.66),w:b.rx-b.center-16,h:Math.round(c.height*.20)},source:'Generic lower-panel fallback',mode:'stretch'}}
 function detectDocument(c,override='auto',text='',pages=[]){
   const t=String(text||'').toLowerCase();
+  if(override==='manual'){const d=detectGeneric(c);d.type='Other document';d.confidence=0;d.source='Manual crop placement • 86 × 54 mm';d.mode='stretch';return d;}
   if(override==='aadhaar')return detectAadhaar(c)||fallbackAadhaar(c);
   if(override==='abha')return detectABHA(c);
   if(override==='eration')return detectERation(c);
@@ -2638,37 +2646,38 @@ function previewSource(c,det,activeSide){
 function renderCropBoxes(det,scale,activeSide){
   const ov=$('cropOverlay');ov.innerHTML='';
   [['front','FRONT'],['back','BACK']].forEach(([side,label])=>{
-    const r=det[side],b=document.createElement('div');b.className='cropbox '+(side==='back'?'backbox ':'')+(side===activeSide?'active':'');
-    b.dataset.side=side;
+    const r=det[side],fixed=!!activeJob?.manualFixed?.[side],b=document.createElement('div');
+    b.className='cropbox '+(side==='back'?'backbox ':'')+(fixed?'manual-fixed ':'')+(side===activeSide?'active':'');
+    b.dataset.side=side;b.dataset.fixed=fixed?'true':'false';
     b.style.left=(r.x*scale)+'px';b.style.top=(r.y*scale)+'px';b.style.width=(r.w*scale)+'px';b.style.height=(r.h*scale)+'px';
-    b.innerHTML='<span class="tag">'+label+'</span><i class="handle tl"></i><i class="handle tr"></i><i class="handle bl"></i><i class="handle br"></i>';
+    b.innerHTML=fixed?'<span class="tag">'+label+' • 86 × 54</span>':'<span class="tag">'+label+'</span><i class="handle tl"></i><i class="handle tr"></i><i class="handle bl"></i><i class="handle br"></i>';
     ov.appendChild(b);bindCropBox(b);
   });
 }
 function bindCropBox(box){
   box.onpointerdown=e=>{
     if(!activeJob)return;
-    e.preventDefault();box.setPointerCapture(e.pointerId);
-    const side=box.dataset.side, c=activeJob.render.sourceCanvas||activeJob.render.canvas,scale=$('sourcePreview').width/c.width;
-    activeEditSide=side; renderCropBoxes(activeJob.det,scale,side);
+    e.preventDefault();
+    const side=box.dataset.side,fixed=box.dataset.fixed==='true',c=activeJob.render.sourceCanvas||activeJob.render.canvas,scale=$('sourcePreview').width/c.width;
+    activeEditSide=side;renderCropBoxes(activeJob.det,scale,side);
     const startX=e.clientX,startY=e.clientY,orig=cloneRect(activeJob.det[side]);
-    const target= e.target.closest('.handle');
+    const target=fixed?null:e.target.closest('.handle');
     const handle=target?Array.from(target.classList).find(v=>['tl','tr','bl','br'].includes(v)):null;
     const ratio=(CARD_W/CARD_H);
     const move=ev=>{
       const dx=(ev.clientX-startX)/scale,dy=(ev.clientY-startY)/scale;
       let r={...orig};
-      if(!handle){
-        r.x=orig.x+dx;r.y=orig.y+dy;
-      }else{
+      if(!handle){r.x=orig.x+dx;r.y=orig.y+dy;}
+      else{
         if(handle==='tl'||handle==='bl'){r.x=orig.x+dx;r.w=orig.w-dx}else{r.w=orig.w+dx}
         r.w=Math.max(120,r.w);r.h=r.w/ratio;
         if(handle==='tl')r.y=orig.y+orig.h-r.h;
         if(handle==='bl')r.y=orig.y;
-        if(handle==='tr'||handle==='tl'){}
-        if(handle==='br'||handle==='bl'){r.y=orig.y}
+        if(handle==='br'||handle==='bl')r.y=orig.y;
       }
-      r=clampRect(r,c);activeJob.det[side]=r;rebuildJobCrop(activeJob);
+      if(fixed){r.x=Math.max(0,Math.min(c.width-r.w,r.x));r.y=Math.max(0,Math.min(c.height-r.h,r.y));}
+      else r=clampRect(r,c);
+      activeJob.det[side]=r;rebuildJobCrop(activeJob);
       previewSource(c,activeJob.det,activeEditSide);drawSheet();updateModalPreviews();
     };
     const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up)};
@@ -2681,12 +2690,54 @@ function updateModalPreviews(){
 }
 function syncModalSliders(job){$('adjX').value=job.adjust.x;$('adjY').value=job.adjust.y;$('adjW').value=job.adjust.w;$('adjH').value=job.adjust.h}
 let activeJob=null,activeEditSide='front';
+function stopManualCrop(){
+  const ov=$('cropOverlay');if(ov){ov.classList.remove('manual-drawing');const draft=ov.querySelector('.manual-draft');if(draft)draft.remove();}
+  const hint=$('manualCropHint');if(hint)hint.textContent='Place a fixed-size 86 × 54 mm box, then drag it into position. Manual boxes cannot be resized.';
+}
+function beginManualCrop(side){
+  if(!activeJob)return;
+  const src=activeJob.render.sourceCanvas||activeJob.render.canvas;
+  if(!src)return;
+  stopManualCrop();
+  activeEditSide=side;
+  activeJob.manualFixed=activeJob.manualFixed||{};
+  activeJob.manualFixed[side]=true;
+  activeJob.adjust={x:0,y:0,w:0,h:0};
+  // PDF.js renders PDF points at `scale` pixels per point; 72 points = 1 inch.
+  const renderScale=activeJob.render.pages?.[0]?.scale||activeJob.render.scale||1;
+  const pxPerMm=renderScale*72/25.4;
+  let w=86*pxPerMm,h=54*pxPerMm;
+  // Fit only when the source page is unusually small; otherwise preserve exact 86 × 54 mm.
+  const fit=Math.min(1,src.width/w,src.height/h);
+  w=Math.max(1,w*fit);h=Math.max(1,h*fit);
+  let x,y;
+  const pages=activeJob.render.sourcePages;
+  if(pages&&pages.length>1){
+    const page1=pages[0],page2=pages[1],gap=activeJob.det.gap||Math.max(20,Math.round(page1.height*.035));
+    x=(src.width-w)/2;
+    y=side==='front'?Math.max(0,(page1.height-h)/2):Math.min(src.height-h,page1.height+gap+(page2.height-h)/2);
+  }else{
+    // Place the two boxes apart initially so both remain visible and can be positioned independently.
+    x=(side==='front'?src.width*.25:src.width*.75)-w/2;
+    x=Math.max(0,Math.min(src.width-w,x));
+    y=(src.height-h)/2;
+  }
+  activeJob.det[side]={x,y,w,h};
+  activeJob.det.type='Other document';
+  activeJob.det.mode='stretch';
+  activeJob.det.source='Manual crop • fixed 86 × 54 mm';
+  activeJob.det.confidence=0;
+  rebuildJobCrop(activeJob);drawSheet();
+  previewSource(src,activeJob.det,side);updateModalPreviews();
+  $('manualCropHint').textContent=`${side.toUpperCase()} fixed 86 × 54 mm box placed. Drag the box to position it; do not draw or resize it. Use Place ${side==='front'?'Back':'Front'} for the other side.`;
+  $('modalNote').textContent=`A fixed-size ${side.toUpperCase()} crop box has been placed. Drag anywhere inside the box to move it; its 86 × 54 mm size is locked. Place the other side separately, then choose Use These Crops.`;
+}
 function showCropPreview(job){
-  activeJob=job;syncModalSliders(job);rebuildJobCrop(job);
+  stopManualCrop();activeJob=job;syncModalSliders(job);rebuildJobCrop(job);
   $('modalTitle').textContent=`Crop Review — Card ${job.index+1} — ${job.det.type}`;
-  $('modalSub').textContent=`${job.det.source} • ${Math.round(job.det.confidence*100)}% confidence`;
+  $('modalSub').textContent=job.docOverride==='manual'?'Manual placement • fixed 86 × 54 mm box':`${job.det.source} • ${Math.round(job.det.confidence*100)}% confidence`;
   previewSource(job.render.sourceCanvas||job.render.canvas,job.det,activeEditSide);updateModalPreviews();
-  $('modalNote').textContent='Drag either crop box to move it. Drag a corner handle to resize it while keeping the selected card ratio. Front/back can be corrected independently. After Use, the selected card crops are placed directly into the glossy-photo print layout.';
+  $('modalNote').textContent=job.docOverride==='manual'?'For an unrecognized document, choose Place Front 86 × 54, then drag the fixed box into position. Repeat with Place Back for the reverse side. Manual boxes cannot be resized; choose Use These Crops when aligned.':'Drag either crop box to move it. Drag a corner handle to resize it while keeping the selected card ratio. Front/back can be corrected independently. After Use, the selected card crops are placed directly into the glossy-photo print layout.';
   $('modal').classList.add('open');
 }
 function bindModal(){
@@ -2694,17 +2745,19 @@ function bindModal(){
     if(!activeJob)return;activeJob.adjust[k]=parseFloat($(id).value);rebuildJobCrop(activeJob);
     previewSource(activeJob.render.sourceCanvas||activeJob.render.canvas,activeJob.det,activeEditSide);updateModalPreviews();drawSheet();
   });
-  $('editFrontBtn').onclick=()=>{activeEditSide='front';if(activeJob)previewSource(activeJob.render.sourceCanvas||activeJob.render.canvas,activeJob.det,activeEditSide)};
-  $('editBackBtn').onclick=()=>{activeEditSide='back';if(activeJob)previewSource(activeJob.render.sourceCanvas||activeJob.render.canvas,activeJob.det,activeEditSide)};
+  $('editFrontBtn').onclick=()=>{stopManualCrop();activeEditSide='front';if(activeJob)previewSource(activeJob.render.sourceCanvas||activeJob.render.canvas,activeJob.det,activeEditSide)};
+  $('editBackBtn').onclick=()=>{stopManualCrop();activeEditSide='back';if(activeJob)previewSource(activeJob.render.sourceCanvas||activeJob.render.canvas,activeJob.det,activeEditSide)};
+  $('manualFrontBtn').onclick=()=>beginManualCrop('front');
+  $('manualBackBtn').onclick=()=>beginManualCrop('back');
   $('resetCropBtn').onclick=()=>{
-    if(!activeJob)return;activeJob.det=cloneDet(activeJob.detBase);activeJob.adjust={x:0,y:0,w:0,h:0};
+    if(!activeJob)return;stopManualCrop();activeJob.manualFixed={};activeJob.det=cloneDet(activeJob.detBase);activeJob.adjust={x:0,y:0,w:0,h:0};
     syncModalSliders(activeJob);rebuildJobCrop(activeJob);previewSource(activeJob.render.sourceCanvas||activeJob.render.canvas,activeJob.det,activeEditSide);updateModalPreviews();drawSheet();
   };
   $('reDetectBtn').onclick=()=>{
-    if(!activeJob)return;activeJob.det=detectDocument(activeJob.render.canvas,activeJob.docOverride||'auto',activeJob.render.text||'',activeJob.render.pages||[]);activeJob.detBase=cloneDet(activeJob.det);activeJob.adjust={x:0,y:0,w:0,h:0};showCropPreview(activeJob)
+    if(!activeJob)return;stopManualCrop();activeJob.manualFixed={};activeJob.det=detectDocument(activeJob.render.canvas,activeJob.docOverride||'auto',activeJob.render.text||'',activeJob.render.pages||[]);activeJob.detBase=cloneDet(activeJob.det);activeJob.adjust={x:0,y:0,w:0,h:0};showCropPreview(activeJob)
   };
-  $('closeModal').onclick=()=>{$('modal').classList.remove('open')};
-  $('useBtn').onclick=()=>{$('modal').classList.remove('open');if(activeJob){cards[activeJob.index].front=activeJob.previewFront;cards[activeJob.index].back=activeJob.previewBack;cards[activeJob.index].status=`${activeJob.det.type} • crop manually reviewed and aligned`;drawSheet();renderSlots()}};
+  $('closeModal').onclick=()=>{stopManualCrop();$('modal').classList.remove('open')};
+  $('useBtn').onclick=()=>{stopManualCrop();$('modal').classList.remove('open');if(activeJob){cards[activeJob.index].front=activeJob.previewFront;cards[activeJob.index].back=activeJob.previewBack;cards[activeJob.index].status=`${activeJob.det.type} • crop manually reviewed and aligned`;drawSheet();renderSlots()}};
 }
 bindModal();
 async function loadPdf(file,password=''){
