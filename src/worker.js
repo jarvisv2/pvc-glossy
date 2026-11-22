@@ -69,73 +69,57 @@ async function authGoogle(request, env) {
 function loginPage(env) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sign in · Card Maker Pro</title><style>
-:root{--bg:#060b16;--panel:#0b1324;--line:#1c2a4a;--blue:#1769ff;--ice:#8fb8ff;--tx:#e6eeff;--mut:#6c7fa6;--good:#3ddc97;--warn:#ffb454;--bad:#ff6b6b;--mono:"JetBrains Mono","Fira Code",ui-monospace,Consolas,monospace}
+:root{--bg:#070a14;--tx:#eaf0ff;--mut:#7f8db0;--blue:#1769ff;--vio:#7c5cff;--cy:#22d3ee;--pink:#ff4fd8;--good:#3ddc97;--warn:#ffb454;--bad:#ff6b6b;--ice:#9cc2ff;--mono:ui-monospace,"JetBrains Mono","Fira Code",Consolas,monospace}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--tx);font-family:var(--mono);overflow:hidden}
-.bg{position:fixed;inset:0;background-image:linear-gradient(#0f1a33 1px,transparent 1px),linear-gradient(90deg,#0f1a33 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(ellipse at center,#000 25%,transparent 75%);mask-image:radial-gradient(ellipse at center,#000 25%,transparent 75%);animation:drift 26s linear infinite}
-.glow{position:fixed;width:560px;height:560px;border-radius:50%;background:radial-gradient(closest-side,rgba(23,105,255,.30),transparent);left:var(--x,50%);top:var(--y,42%);transform:translate(-50%,-50%);pointer-events:none;transition:left .8s ease-out,top .8s ease-out}
-@keyframes drift{to{background-position:44px 44px}}
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--tx);font-family:Inter,"Segoe UI",Arial,sans-serif;overflow:hidden}
+.aurora{position:fixed;inset:-20%;filter:blur(80px);opacity:.42;pointer-events:none}
+.aurora i{position:absolute;border-radius:50%;width:46vmax;height:46vmax}
+.a1{background:var(--blue);left:-4%;top:-8%;animation:f1 19s ease-in-out infinite alternate}
+.a2{background:var(--vio);right:-8%;top:8%;animation:f2 23s ease-in-out infinite alternate}
+.a3{background:var(--cy);left:28%;bottom:-30%;opacity:.55;animation:f3 21s ease-in-out infinite alternate}
+.a4{background:var(--pink);right:18%;bottom:-22%;width:30vmax;height:30vmax;opacity:.35;animation:f1 26s ease-in-out infinite alternate-reverse}
+@keyframes f1{to{transform:translate(12vw,9vh) scale(1.15)}}@keyframes f2{to{transform:translate(-10vw,12vh) scale(.9)}}@keyframes f3{to{transform:translate(8vw,-10vh) scale(1.2)}}
+.grid{position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(ellipse at center,#000 20%,transparent 72%);mask-image:radial-gradient(ellipse at center,#000 20%,transparent 72%);animation:drift 30s linear infinite}
+@keyframes drift{to{background-position:46px 46px}}
+.glow{position:fixed;width:460px;height:460px;border-radius:50%;background:radial-gradient(closest-side,rgba(124,92,255,.28),transparent);left:var(--x,50%);top:var(--y,45%);transform:translate(-50%,-50%);pointer-events:none;transition:left .9s ease-out,top .9s ease-out}
 @property --a{syntax:"<angle>";initial-value:0deg;inherits:false}
-@keyframes spin{to{--a:360deg}}
-@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
-@keyframes blink{50%{opacity:0}}
-.win{position:relative;width:min(470px,92vw);background:var(--panel);border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 60px rgba(23,105,255,.12);animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
-.win::before{content:"";position:absolute;inset:0;border-radius:14px;padding:1px;background:conic-gradient(from var(--a),var(--line) 0 62%,var(--blue) 82%,var(--ice) 90%,var(--line) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 7s linear infinite;pointer-events:none}
-.bar{display:flex;justify-content:space-between;align-items:center;padding:0 18px;height:44px;border-bottom:1px solid var(--line);font-size:12px;color:var(--mut)}
-.tab{color:var(--tx);padding:13px 0 12px;border-bottom:2px solid var(--blue);margin-bottom:-1px}
-.st{display:flex;align-items:center;gap:8px}.st::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 10px currentColor;color:var(--warn)}
-.win[data-s=ok] .st::before{background:var(--good);color:var(--good)}.win[data-s=bad] .st::before{background:var(--bad);color:var(--bad)}.win[data-s=busy] .st::before{background:var(--ice);color:var(--ice);animation:blink 1s infinite}
-.code{padding:22px 18px 8px;font-size:13.5px;line-height:2;min-height:170px}
-.ln{display:flex;gap:16px;white-space:pre-wrap;word-break:break-word}.ln i{color:#34456b;font-style:normal;min-width:1.4em;text-align:right;user-select:none}
-.k{color:#7aa7ff}.s{color:#7ee0b5}.c{color:var(--mut)}.n{color:var(--tx)}.g{color:var(--good)}.w{color:var(--warn)}.b{color:var(--bad)}
-.caret{display:inline-block;width:8px;height:1.1em;background:var(--ice);vertical-align:-3px;margin-left:2px;animation:blink 1s steps(1) infinite}
-.gw{padding:6px 18px 26px 52px;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .6s ease,transform .6s ease;min-height:76px}
-.gw.on{opacity:1;transform:none;pointer-events:auto}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-@media (max-width:420px){.code{font-size:12.5px}.gw{padding-left:18px}}
-</style></head><body><div class="bg"></div><div class="glow" id="glow"></div>
-<main class="win" id="win" data-s="lock"><div class="bar"><span class="tab">access.js</span><span class="st" id="st">locked</span></div>
-<div class="code" id="code" aria-live="polite"></div>
+@keyframes spin{to{--a:360deg}}@keyframes rise{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes inr{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pulse{50%{box-shadow:0 0 34px rgba(124,92,255,.8)}}@keyframes blink{50%{opacity:.25}}
+.card{position:relative;width:min(420px,92vw);padding:30px 28px 28px;border-radius:20px;background:rgba(10,14,30,.74);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 30px 90px rgba(0,0,0,.6);animation:rise .9s cubic-bezier(.2,.8,.2,1) both}
+.card::before{content:"";position:absolute;inset:0;border-radius:20px;padding:1.5px;background:conic-gradient(from var(--a),rgba(255,255,255,.08) 0 52%,var(--blue) 66%,var(--vio) 76%,var(--pink) 85%,var(--cy) 93%,rgba(255,255,255,.08));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 8s linear infinite;pointer-events:none}
+.hd{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.mk{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--vio) 60%,var(--pink));box-shadow:0 0 22px rgba(124,92,255,.5);animation:pulse 4s ease-in-out infinite}
+h1{margin:0;font-size:22px;letter-spacing:-.2px}.sub{margin:3px 0 0;color:var(--mut);font-size:13.5px}
+.kv{font-family:var(--mono);font-size:13px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.025);overflow:hidden}
+.r{display:flex;justify-content:space-between;gap:14px;padding:12px 14px;opacity:0;animation:inr .6s cubic-bezier(.2,.8,.2,1) forwards}
+.r+.r{border-top:1px dashed rgba(255,255,255,.09)}.r:nth-child(1){animation-delay:.35s}.r:nth-child(2){animation-delay:.5s}.r:nth-child(3){animation-delay:.65s}
+.r span{color:var(--mut)}.r b{font-weight:500;color:var(--tx);text-align:right}
+#sv{display:inline-flex;align-items:center;gap:8px}#sv::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
+.w{color:var(--warn)!important}.i{color:var(--ice)!important}.i::before{animation:blink 1s infinite}.g{color:var(--good)!important}.b{color:var(--bad)!important}
+.gw{display:flex;justify-content:center;margin-top:24px;min-height:44px;opacity:0;animation:fade .7s ease .95s forwards;transition:opacity .3s}
+.m{margin:14px 0 0;min-height:20px;font-size:13px;line-height:1.5;text-align:center;color:var(--mut)}.m.w{color:var(--warn)}.m.g{color:var(--good)}.m.b{color:var(--bad)}.m.i{color:var(--ice)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.r,.gw{opacity:1}}
+</style></head><body><div class="aurora"><i class="a1"></i><i class="a2"></i><i class="a3"></i><i class="a4"></i></div><div class="grid"></div><div class="glow"></div>
+<main class="card"><div class="hd"><div class="mk"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/></svg></div>
+<div><h1>Card Maker Pro</h1><p class="sub">Sign in to continue</p></div></div>
+<div class="kv"><div class="r"><span>access</span><b>approved emails only</b></div><div class="r"><span>method</span><b>google account</b></div><div class="r"><span>status</span><b id="sv" class="w">locked</b></div></div>
 <div class="gw" id="gw"><div id="g_id_onload" data-client_id="${esc(env.GOOGLE_CLIENT_ID)}" data-callback="onCred" data-auto_prompt="false"></div>
-<div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_black" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left"></div></div>
-<noscript><p style="padding:0 18px 20px;color:#ffb454">Turn on JavaScript to sign in.</p></noscript></main>
+<div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_blue" data-text="signin_with" data-shape="pill" data-logo_alignment="left"></div></div>
+<p class="m" id="msg" role="status"></p><noscript><p class="m w">Turn on JavaScript to sign in.</p></noscript></main>
 <script>
-var code=document.getElementById('code'),win=document.getElementById('win'),st=document.getElementById('st'),gw=document.getElementById('gw');
-var RM=window.matchMedia('(prefers-reduced-motion: reduce)').matches,n=0,caret=document.createElement('span');caret.className='caret';
-function state(s,t){win.setAttribute('data-s',s);st.textContent=t}
-function line(tokens,done){
-  n++;var row=document.createElement('div');row.className='ln';
-  var g=document.createElement('i');g.textContent=n;var t=document.createElement('span');
-  row.appendChild(g);row.appendChild(t);code.appendChild(row);
-  var i=0,j=0,cur=null;
-  (function step(){
-    if(i>=tokens.length){if(done)done();return}
-    var tk=tokens[i];
-    if(j===0){cur=document.createElement('span');cur.className=tk[1];t.appendChild(cur)}
-    if(RM){cur.textContent=tk[0];i++;j=0;return step()}
-    j++;cur.textContent=tk[0].slice(0,j);t.appendChild(caret);
-    if(j>=tk[0].length){i++;j=0}
-    setTimeout(step,12+Math.random()*20)
-  })()
-}
-function seq(list,done){(function next(k){if(k>=list.length){if(done)done();return}line(list[k],function(){next(k+1)})})(0)}
-seq([
-  [['// card-maker-pro / access control','c']],
-  [['const ','k'],['site','n'],[' = ','n'],['"Card Maker Pro"','s'],[';','n']],
-  [['const ','k'],['access','n'],[' = ','n'],['"approved emails only"','s'],[';','n']],
-  [['await ','k'],['signIn','n'],['(','n'],['"google"','s'],[');','n']]
-],function(){gw.className='gw on';state('lock','waiting for sign-in')});
+var sv=document.getElementById('sv'),msg=document.getElementById('msg'),gw=document.getElementById('gw');
+function setS(c,t,m){sv.className=c;sv.textContent=t;msg.className='m '+c;msg.textContent=m||''}
 window.onCred=function(r){
-  gw.className='gw';state('busy','verifying');
-  seq([[['> verifying token...','c']]],function(){
-    fetch('/auth/google',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({credential:r.credential})})
-    .then(function(x){return x.json()}).then(function(d){
-      if(d.status==='approved'){state('ok','access granted');seq([[['> status: ','n'],['"approved"','g']],[['> opening site...','c']]],function(){location.href='/'})}
-      else if(d.status==='pending'){state('lock','pending approval');seq([[['> status: ','n'],['"pending"','w']],[['// your email is waiting for approval.','c']],[['// ask the site owner, then sign in again.','c']]],function(){gw.className='gw on'})}
-      else if(d.status==='blocked'){state('bad','access denied');seq([[['> status: ','n'],['"blocked"','b']],[['// this email does not have access.','c']]])}
-      else{state('bad','error');seq([[['> error: ','n'],['"'+(d.error||'sign-in failed')+'"','b']]],function(){gw.className='gw on'})}
-    }).catch(function(){state('bad','error');seq([[['> error: ','n'],['"network problem, try again"','b']]],function(){gw.className='gw on'})})
-  })
+  setS('i','verifying','Checking your account...');gw.style.pointerEvents='none';gw.style.opacity='.35';
+  fetch('/auth/google',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({credential:r.credential})})
+  .then(function(x){return x.json()}).then(function(d){
+    gw.style.pointerEvents='';gw.style.opacity='1';
+    if(d.status==='approved'){setS('g','approved','Access granted. Opening the site...');setTimeout(function(){location.href='/'},600)}
+    else if(d.status==='pending')setS('w','pending approval','Your email is waiting for approval. Ask the site owner, then sign in again.');
+    else if(d.status==='blocked')setS('b','blocked','This email does not have access.');
+    else setS('b','error',d.error||'Sign-in failed. Please try again.')
+  }).catch(function(){gw.style.pointerEvents='';gw.style.opacity='1';setS('b','error','Network problem. Please try again.')})
 };
 document.addEventListener('mousemove',function(e){var s=document.documentElement.style;s.setProperty('--x',e.clientX+'px');s.setProperty('--y',e.clientY+'px')});
 </script><script src="https://accounts.google.com/gsi/client" async defer></script></body></html>`;
