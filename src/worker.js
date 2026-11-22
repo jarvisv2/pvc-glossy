@@ -69,24 +69,75 @@ async function authGoogle(request, env) {
 function loginPage(env) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sign in · Card Maker Pro</title><style>
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#eef4fb;font-family:Inter,Segoe UI,Arial,sans-serif;color:#10243d}
-main{width:min(380px,92vw);background:#fff;border:1px solid #d9e2ee;border-radius:14px;padding:32px 28px;box-shadow:0 14px 40px rgba(22,50,85,.10)}
-h1{margin:0 0 6px;font-size:24px;color:#17345d}p{margin:0 0 22px;color:#65768d;font-size:14px;line-height:1.5}
-.g{display:flex;justify-content:center;min-height:44px}#msg{margin-top:18px;font-size:14px;line-height:1.5;min-height:20px}.ok{color:#0a9b6f}.warn{color:#a96800}.bad{color:#d92d20}
-</style></head><body><main>
-<h1>Card Maker Pro</h1><p>Sign in with your Google account. Access is limited to approved emails.</p>
-<div class="g"><div id="g_id_onload" data-client_id="${esc(env.GOOGLE_CLIENT_ID)}" data-callback="onCred" data-auto_prompt="false"></div>
-<div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="pill"></div></div>
-<div id="msg" role="status"></div></main>
+:root{--bg:#060b16;--panel:#0b1324;--line:#1c2a4a;--blue:#1769ff;--ice:#8fb8ff;--tx:#e6eeff;--mut:#6c7fa6;--good:#3ddc97;--warn:#ffb454;--bad:#ff6b6b;--mono:"JetBrains Mono","Fira Code",ui-monospace,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--tx);font-family:var(--mono);overflow:hidden}
+.bg{position:fixed;inset:0;background-image:linear-gradient(#0f1a33 1px,transparent 1px),linear-gradient(90deg,#0f1a33 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(ellipse at center,#000 25%,transparent 75%);mask-image:radial-gradient(ellipse at center,#000 25%,transparent 75%);animation:drift 26s linear infinite}
+.glow{position:fixed;width:560px;height:560px;border-radius:50%;background:radial-gradient(closest-side,rgba(23,105,255,.30),transparent);left:var(--x,50%);top:var(--y,42%);transform:translate(-50%,-50%);pointer-events:none;transition:left .8s ease-out,top .8s ease-out}
+@keyframes drift{to{background-position:44px 44px}}
+@property --a{syntax:"<angle>";initial-value:0deg;inherits:false}
+@keyframes spin{to{--a:360deg}}
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes blink{50%{opacity:0}}
+.win{position:relative;width:min(470px,92vw);background:var(--panel);border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 60px rgba(23,105,255,.12);animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
+.win::before{content:"";position:absolute;inset:0;border-radius:14px;padding:1px;background:conic-gradient(from var(--a),var(--line) 0 62%,var(--blue) 82%,var(--ice) 90%,var(--line) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 7s linear infinite;pointer-events:none}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:0 18px;height:44px;border-bottom:1px solid var(--line);font-size:12px;color:var(--mut)}
+.tab{color:var(--tx);padding:13px 0 12px;border-bottom:2px solid var(--blue);margin-bottom:-1px}
+.st{display:flex;align-items:center;gap:8px}.st::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 10px currentColor;color:var(--warn)}
+.win[data-s=ok] .st::before{background:var(--good);color:var(--good)}.win[data-s=bad] .st::before{background:var(--bad);color:var(--bad)}.win[data-s=busy] .st::before{background:var(--ice);color:var(--ice);animation:blink 1s infinite}
+.code{padding:22px 18px 8px;font-size:13.5px;line-height:2;min-height:170px}
+.ln{display:flex;gap:16px;white-space:pre-wrap;word-break:break-word}.ln i{color:#34456b;font-style:normal;min-width:1.4em;text-align:right;user-select:none}
+.k{color:#7aa7ff}.s{color:#7ee0b5}.c{color:var(--mut)}.n{color:var(--tx)}.g{color:var(--good)}.w{color:var(--warn)}.b{color:var(--bad)}
+.caret{display:inline-block;width:8px;height:1.1em;background:var(--ice);vertical-align:-3px;margin-left:2px;animation:blink 1s steps(1) infinite}
+.gw{padding:6px 18px 26px 52px;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .6s ease,transform .6s ease;min-height:76px}
+.gw.on{opacity:1;transform:none;pointer-events:auto}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:420px){.code{font-size:12.5px}.gw{padding-left:18px}}
+</style></head><body><div class="bg"></div><div class="glow" id="glow"></div>
+<main class="win" id="win" data-s="lock"><div class="bar"><span class="tab">access.js</span><span class="st" id="st">locked</span></div>
+<div class="code" id="code" aria-live="polite"></div>
+<div class="gw" id="gw"><div id="g_id_onload" data-client_id="${esc(env.GOOGLE_CLIENT_ID)}" data-callback="onCred" data-auto_prompt="false"></div>
+<div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_black" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left"></div></div>
+<noscript><p style="padding:0 18px 20px;color:#ffb454">Turn on JavaScript to sign in.</p></noscript></main>
 <script>
-function say(t,c){var m=document.getElementById('msg');m.textContent=t;m.className=c}
-window.onCred=function(r){say('Checking…','');
-fetch('/auth/google',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({credential:r.credential})})
-.then(function(x){return x.json()}).then(function(d){
-if(d.status==='approved'){say('Signed in. Opening…','ok');location.href='/'}
-else if(d.status==='pending')say('Your email is waiting for approval. Ask the site owner to approve it, then sign in again.','warn');
-else if(d.status==='blocked')say('This email does not have access.','bad');
-else say('Sign-in failed. Please try again.','bad')}).catch(function(){say('Network error. Please try again.','bad')})};
+var code=document.getElementById('code'),win=document.getElementById('win'),st=document.getElementById('st'),gw=document.getElementById('gw');
+var RM=window.matchMedia('(prefers-reduced-motion: reduce)').matches,n=0,caret=document.createElement('span');caret.className='caret';
+function state(s,t){win.setAttribute('data-s',s);st.textContent=t}
+function line(tokens,done){
+  n++;var row=document.createElement('div');row.className='ln';
+  var g=document.createElement('i');g.textContent=n;var t=document.createElement('span');
+  row.appendChild(g);row.appendChild(t);code.appendChild(row);
+  var i=0,j=0,cur=null;
+  (function step(){
+    if(i>=tokens.length){if(done)done();return}
+    var tk=tokens[i];
+    if(j===0){cur=document.createElement('span');cur.className=tk[1];t.appendChild(cur)}
+    if(RM){cur.textContent=tk[0];i++;j=0;return step()}
+    j++;cur.textContent=tk[0].slice(0,j);t.appendChild(caret);
+    if(j>=tk[0].length){i++;j=0}
+    setTimeout(step,12+Math.random()*20)
+  })()
+}
+function seq(list,done){(function next(k){if(k>=list.length){if(done)done();return}line(list[k],function(){next(k+1)})})(0)}
+seq([
+  [['// card-maker-pro / access control','c']],
+  [['const ','k'],['site','n'],[' = ','n'],['"Card Maker Pro"','s'],[';','n']],
+  [['const ','k'],['access','n'],[' = ','n'],['"approved emails only"','s'],[';','n']],
+  [['await ','k'],['signIn','n'],['(','n'],['"google"','s'],[');','n']]
+],function(){gw.className='gw on';state('lock','waiting for sign-in')});
+window.onCred=function(r){
+  gw.className='gw';state('busy','verifying');
+  seq([[['> verifying token...','c']]],function(){
+    fetch('/auth/google',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({credential:r.credential})})
+    .then(function(x){return x.json()}).then(function(d){
+      if(d.status==='approved'){state('ok','access granted');seq([[['> status: ','n'],['"approved"','g']],[['> opening site...','c']]],function(){location.href='/'})}
+      else if(d.status==='pending'){state('lock','pending approval');seq([[['> status: ','n'],['"pending"','w']],[['// your email is waiting for approval.','c']],[['// ask the site owner, then sign in again.','c']]],function(){gw.className='gw on'})}
+      else if(d.status==='blocked'){state('bad','access denied');seq([[['> status: ','n'],['"blocked"','b']],[['// this email does not have access.','c']]])}
+      else{state('bad','error');seq([[['> error: ','n'],['"'+(d.error||'sign-in failed')+'"','b']]],function(){gw.className='gw on'})}
+    }).catch(function(){state('bad','error');seq([[['> error: ','n'],['"network problem, try again"','b']]],function(){gw.className='gw on'})})
+  })
+};
+document.addEventListener('mousemove',function(e){var s=document.documentElement.style;s.setProperty('--x',e.clientX+'px');s.setProperty('--y',e.clientY+'px')});
 </script><script src="https://accounts.google.com/gsi/client" async defer></script></body></html>`;
 }
 
@@ -113,7 +164,10 @@ export default {
 
     if (path === '/login') return html(loginPage(env));
     if (path === '/logout') return new Response(null, { status: 302, headers: { location: '/login', 'set-cookie': 'sid=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Lax' } });
-    if (path === '/auth/google' && request.method === 'POST') return authGoogle(request, env);
+    if (path === '/auth/google' && request.method === 'POST') {
+      try { return await authGoogle(request, env); }
+      catch (e) { return json({ error: String((e && e.message) || e) }, 500); }
+    }
 
     const email = await readSession(env, request);
     if (!email) return request.method === 'GET' ? Response.redirect(url.origin + '/login', 302) : new Response('Login required', { status: 401 });
