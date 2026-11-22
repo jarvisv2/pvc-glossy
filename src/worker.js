@@ -68,56 +68,198 @@ async function authGoogle(request, env) {
 
 function loginPage(env) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sign in · Card Maker Pro</title><style>
-:root{--bg:#070a14;--tx:#eaf0ff;--mut:#7f8db0;--blue:#1769ff;--vio:#7c5cff;--cy:#22d3ee;--pink:#ff4fd8;--good:#3ddc97;--warn:#ffb454;--bad:#ff6b6b;--ice:#9cc2ff;--mono:ui-monospace,"JetBrains Mono","Fira Code",Consolas,monospace}
+<title>Sign in · Card Maker Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050811;
+  --surface:rgba(12,17,33,.72);
+  --border:rgba(255,255,255,.09);
+  --tx:#f1f5ff;
+  --mut:#8b99bd;
+  --blue:#3b82f6;
+  --vio:#8b5cf6;
+  --cy:#22d3ee;
+  --pink:#ec4899;
+  --good:#34d399;
+  --warn:#fbbf24;
+  --bad:#f87171;
+  --ice:#7dd3fc;
+  --mono:"JetBrains Mono",ui-monospace,"Fira Code",Consolas,monospace;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--tx);font-family:Inter,"Segoe UI",Arial,sans-serif;overflow:hidden}
-.aurora{position:fixed;inset:-20%;filter:blur(80px);opacity:.42;pointer-events:none}
-.aurora i{position:absolute;border-radius:50%;width:46vmax;height:46vmax}
-.a1{background:var(--blue);left:-4%;top:-8%;animation:f1 19s ease-in-out infinite alternate}
-.a2{background:var(--vio);right:-8%;top:8%;animation:f2 23s ease-in-out infinite alternate}
-.a3{background:var(--cy);left:28%;bottom:-30%;opacity:.55;animation:f3 21s ease-in-out infinite alternate}
-.a4{background:var(--pink);right:18%;bottom:-22%;width:30vmax;height:30vmax;opacity:.35;animation:f1 26s ease-in-out infinite alternate-reverse}
-@keyframes f1{to{transform:translate(12vw,9vh) scale(1.15)}}@keyframes f2{to{transform:translate(-10vw,12vh) scale(.9)}}@keyframes f3{to{transform:translate(8vw,-10vh) scale(1.2)}}
-.grid{position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(ellipse at center,#000 20%,transparent 72%);mask-image:radial-gradient(ellipse at center,#000 20%,transparent 72%);animation:drift 30s linear infinite}
-@keyframes drift{to{background-position:46px 46px}}
-.glow{position:fixed;width:460px;height:460px;border-radius:50%;background:radial-gradient(closest-side,rgba(124,92,255,.28),transparent);left:var(--x,50%);top:var(--y,45%);transform:translate(-50%,-50%);pointer-events:none;transition:left .9s ease-out,top .9s ease-out}
+body{
+  margin:0;
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  background:var(--bg);
+  color:var(--tx);
+  font-family:var(--sans);
+  overflow:hidden;
+}
+.aurora{position:fixed;inset:-25%;filter:blur(90px);opacity:.38;pointer-events:none}
+.aurora i{position:absolute;border-radius:50%;width:44vmax;height:44vmax}
+.a1{background:var(--blue);left:-6%;top:-10%;animation:f1 20s ease-in-out infinite alternate}
+.a2{background:var(--vio);right:-8%;top:6%;animation:f2 24s ease-in-out infinite alternate}
+.a3{background:var(--cy);left:26%;bottom:-28%;opacity:.5;animation:f3 22s ease-in-out infinite alternate}
+.a4{background:var(--pink);right:14%;bottom:-24%;width:30vmax;height:30vmax;opacity:.3;animation:f1 26s ease-in-out infinite alternate-reverse}
+@keyframes f1{to{transform:translate(10vw,8vh) scale(1.12)}}
+@keyframes f2{to{transform:translate(-10vw,10vh) scale(.92)}}
+@keyframes f3{to{transform:translate(8vw,-10vh) scale(1.16)}}
+.dots{
+  position:fixed;inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.14) 1px,transparent 1px);
+  background-size:28px 28px;
+  -webkit-mask-image:radial-gradient(ellipse at center,#000 18%,transparent 74%);
+  mask-image:radial-gradient(ellipse at center,#000 18%,transparent 74%);
+  pointer-events:none;
+}
+.glow{
+  position:fixed;width:520px;height:520px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(56,189,248,.16),rgba(139,92,246,.12),transparent);
+  left:var(--x,50%);top:var(--y,45%);
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  transition:left .7s ease-out,top .7s ease-out;
+}
 @property --a{syntax:"<angle>";initial-value:0deg;inherits:false}
-@keyframes spin{to{--a:360deg}}@keyframes rise{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
-@keyframes inr{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@keyframes pulse{50%{box-shadow:0 0 34px rgba(124,92,255,.8)}}@keyframes blink{50%{opacity:.25}}
-.card{position:relative;width:min(420px,92vw);padding:30px 28px 28px;border-radius:20px;background:rgba(10,14,30,.74);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 30px 90px rgba(0,0,0,.6);animation:rise .9s cubic-bezier(.2,.8,.2,1) both}
-.card::before{content:"";position:absolute;inset:0;border-radius:20px;padding:1.5px;background:conic-gradient(from var(--a),rgba(255,255,255,.08) 0 52%,var(--blue) 66%,var(--vio) 76%,var(--pink) 85%,var(--cy) 93%,rgba(255,255,255,.08));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 8s linear infinite;pointer-events:none}
-.hd{display:flex;align-items:center;gap:14px;margin-bottom:22px}
-.mk{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--vio) 60%,var(--pink));box-shadow:0 0 22px rgba(124,92,255,.5);animation:pulse 4s ease-in-out infinite}
-h1{margin:0;font-size:22px;letter-spacing:-.2px}.sub{margin:3px 0 0;color:var(--mut);font-size:13.5px}
-.kv{font-family:var(--mono);font-size:13px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.025);overflow:hidden}
-.r{display:flex;justify-content:space-between;gap:14px;padding:12px 14px;opacity:0;animation:inr .6s cubic-bezier(.2,.8,.2,1) forwards}
-.r+.r{border-top:1px dashed rgba(255,255,255,.09)}.r:nth-child(1){animation-delay:.35s}.r:nth-child(2){animation-delay:.5s}.r:nth-child(3){animation-delay:.65s}
-.r span{color:var(--mut)}.r b{font-weight:500;color:var(--tx);text-align:right}
-#sv{display:inline-flex;align-items:center;gap:8px}#sv::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
+@keyframes spin{to{--a:360deg}}
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes blink{50%{opacity:.25}}
+.shell{
+  position:relative;
+  width:min(430px,100%);
+  border-radius:24px;
+  background:var(--surface);
+  -webkit-backdrop-filter:blur(22px);
+  backdrop-filter:blur(22px);
+  box-shadow:0 32px 96px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.08);
+  animation:rise .8s cubic-bezier(.16,1,.3,1) both;
+  overflow:hidden;
+}
+.shell::before{
+  content:"";position:absolute;inset:0;border-radius:24px;padding:1.25px;
+  background:conic-gradient(from var(--a),rgba(255,255,255,.08) 0 54%,var(--cy) 68%,var(--blue) 78%,var(--vio) 88%,var(--pink) 95%,rgba(255,255,255,.08));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  animation:spin 9s linear infinite;pointer-events:none;
+}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.02);
+}
+.dots-ui{display:flex;gap:7px;align-items:center}
+.dots-ui span{width:9px;height:9px;border-radius:50%;opacity:.75}
+.dots-ui span:nth-child(1){background:#ff5f57}
+.dots-ui span:nth-child(2){background:#febc2e}
+.dots-ui span:nth-child(3){background:#28c840}
+.pill{
+  font-family:var(--mono);font-size:11.5px;font-weight:500;
+  display:inline-flex;align-items:center;gap:7px;
+  padding:4px 10px;border-radius:999px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  letter-spacing:.2px;
+}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
 .w{color:var(--warn)!important}.i{color:var(--ice)!important}.i::before{animation:blink 1s infinite}.g{color:var(--good)!important}.b{color:var(--bad)!important}
-.gw{display:flex;justify-content:center;margin-top:24px;min-height:44px;opacity:0;animation:fade .7s ease .95s forwards;transition:opacity .3s}
-.m{margin:14px 0 0;min-height:20px;font-size:13px;line-height:1.5;text-align:center;color:var(--mut)}.m.w{color:var(--warn)}.m.g{color:var(--good)}.m.b{color:var(--bad)}.m.i{color:var(--ice)}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.r,.gw{opacity:1}}
-</style></head><body><div class="aurora"><i class="a1"></i><i class="a2"></i><i class="a3"></i><i class="a4"></i></div><div class="grid"></div><div class="glow"></div>
-<main class="card"><div class="hd"><div class="mk"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/></svg></div>
-<div><h1>Card Maker Pro</h1><p class="sub">Sign in to continue</p></div></div>
-<div class="kv"><div class="r"><span>access</span><b>approved emails only</b></div><div class="r"><span>method</span><b>google account</b></div><div class="r"><span>status</span><b id="sv" class="w">locked</b></div></div>
-<div class="gw" id="gw"><div id="g_id_onload" data-client_id="${esc(env.GOOGLE_CLIENT_ID)}" data-callback="onCred" data-auto_prompt="false"></div>
-<div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_blue" data-text="signin_with" data-shape="pill" data-logo_alignment="left"></div></div>
-<p class="m" id="msg" role="status"></p><noscript><p class="m w">Turn on JavaScript to sign in.</p></noscript></main>
+.body{padding:28px 28px 30px;text-align:center}
+.badge{
+  width:54px;height:54px;margin:0 auto 18px;border-radius:16px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,rgba(59,130,246,.22),rgba(139,92,246,.24),rgba(34,211,238,.18));
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 12px 30px rgba(59,130,246,.22),inset 0 1px 0 rgba(255,255,255,.15);
+}
+.eyebrow{
+  font-family:var(--mono);font-size:12px;color:var(--cy);
+  letter-spacing:.4px;margin:0 0 8px;opacity:.9;
+}
+h1{
+  margin:0;
+  font-family:var(--mono);
+  font-size:clamp(21px,4.5vw,25px);
+  font-weight:700;
+  letter-spacing:-.5px;
+  line-height:1.25;
+}
+.tk{color:var(--mut);font-weight:500}
+.pro{
+  background:linear-gradient(90deg,var(--cy),var(--blue),var(--vio));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.sub{
+  margin:10px auto 0;max-width:290px;
+  color:var(--mut);font-size:13.5px;line-height:1.5;
+}
+.gw-box{
+  margin-top:26px;padding:18px 16px;
+  border-radius:16px;
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.07);
+  opacity:0;animation:fade .65s ease .25s forwards;
+}
+.gw{
+  display:flex;justify-content:center;align-items:center;
+  min-height:44px;transition:opacity .25s ease;
+}
+.m{
+  margin:16px 0 0;min-height:20px;
+  font-family:var(--mono);font-size:12px;line-height:1.55;
+  color:var(--mut);
+}
+.m.w{color:var(--warn)}.m.g{color:var(--good)}.m.b{color:var(--bad)}.m.i{color:var(--ice)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.gw-box{opacity:1}}
+</style></head>
+<body>
+<div class="aurora"><i class="a1"></i><i class="a2"></i><i class="a3"></i><i class="a4"></i></div>
+<div class="dots"></div>
+<div class="glow"></div>
+<main class="shell">
+  <div class="topbar">
+    <div class="dots-ui" aria-hidden="true"><span></span><span></span><span></span></div>
+    <span id="sv" class="pill w">locked</span>
+  </div>
+  <div class="body">
+    <div class="badge" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#eaf0ff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2.5" y="5" width="19" height="14" rx="3"/>
+        <path d="M2.5 10h19"/>
+        <path d="M6.5 14.5h4.5"/>
+        <circle cx="17.5" cy="14.5" r="1.25" fill="#22d3ee" stroke="none"/>
+      </svg>
+    </div>
+    <p class="eyebrow">// studio.workspace</p>
+    <h1><span class="tk">&lt;</span>Card Maker <span class="pro">Pro</span><span class="tk"> /&gt;</span></h1>
+    <p class="sub">Sign in to continue to your workspace.</p>
+    <div class="gw-box">
+      <div class="gw" id="gw">
+        <div id="g_id_onload" data-client_id="${esc(env.GOOGLE_CLIENT_ID)}" data-callback="onCred" data-auto_prompt="false"></div>
+        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_black" data-text="signin_with" data-shape="pill" data-logo_alignment="left"></div>
+      </div>
+    </div>
+    <p class="m" id="msg" role="status"></p>
+    <noscript><p class="m w">Enable JavaScript to continue.</p></noscript>
+  </div>
+</main>
 <script>
 var sv=document.getElementById('sv'),msg=document.getElementById('msg'),gw=document.getElementById('gw');
-function setS(c,t,m){sv.className=c;sv.textContent=t;msg.className='m '+c;msg.textContent=m||''}
+function setS(c,t,m){sv.className='pill '+c;sv.textContent=t;msg.className='m '+c;msg.textContent=m||''}
 window.onCred=function(r){
   setS('i','verifying','Checking your account...');gw.style.pointerEvents='none';gw.style.opacity='.35';
   fetch('/auth/google',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({credential:r.credential})})
   .then(function(x){return x.json()}).then(function(d){
     gw.style.pointerEvents='';gw.style.opacity='1';
-    if(d.status==='approved'){setS('g','approved','Access granted. Opening the site...');setTimeout(function(){location.href='/'},600)}
-    else if(d.status==='pending')setS('w','pending approval','Your email is waiting for approval. Ask the site owner, then sign in again.');
-    else if(d.status==='blocked')setS('b','blocked','This email does not have access.');
+    if(d.status==='approved'){setS('g','approved','Access granted. Opening workspace...');setTimeout(function(){location.href='/'},600)}
+    else if(d.status==='pending')setS('w','pending','Your account is waiting for approval. Try again once approved.');
+    else if(d.status==='blocked')setS('b','blocked','This account does not have access.');
     else setS('b','error',d.error||'Sign-in failed. Please try again.')
   }).catch(function(){gw.style.pointerEvents='';gw.style.opacity='1';setS('b','error','Network problem. Please try again.')})
 };
